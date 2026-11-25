@@ -1,0 +1,444 @@
+{
+  "format": "runner-rehearsal-proof/v1",
+  "tape": {
+    "version": 1,
+    "name": "The blocked release",
+    "runners": 2,
+    "jobs": [
+      {
+        "id": "check-api",
+        "name": "API checks",
+        "arrival": 0,
+        "minutes": 9,
+        "estimate": 9,
+        "needs": [],
+        "deadline": null
+      },
+      {
+        "id": "check-web",
+        "name": "Browser matrix",
+        "arrival": 0,
+        "minutes": 9,
+        "estimate": 9,
+        "needs": [],
+        "deadline": null
+      },
+      {
+        "id": "check-sdk",
+        "name": "SDK checks",
+        "arrival": 1,
+        "minutes": 4,
+        "estimate": 4,
+        "needs": [],
+        "deadline": null
+      },
+      {
+        "id": "check-docs",
+        "name": "Docs build",
+        "arrival": 5,
+        "minutes": 2,
+        "estimate": 2,
+        "needs": [],
+        "deadline": null
+      },
+      {
+        "id": "release-build",
+        "name": "Build artifact",
+        "arrival": 2,
+        "minutes": 3,
+        "estimate": 3,
+        "needs": [],
+        "deadline": null
+      },
+      {
+        "id": "release-tests",
+        "name": "Release tests",
+        "arrival": 2,
+        "minutes": 2,
+        "estimate": 2,
+        "needs": [
+          "release-build"
+        ],
+        "deadline": null
+      },
+      {
+        "id": "publish",
+        "name": "Publish release",
+        "arrival": 2,
+        "minutes": 1,
+        "estimate": 1,
+        "needs": [
+          "release-tests"
+        ],
+        "deadline": 10
+      }
+    ],
+    "variants": [
+      {
+        "id": "slow-checks",
+        "name": "Slow checks",
+        "minutes": {
+          "check-api": 12,
+          "check-web": 13
+        },
+        "arrivals": {}
+      },
+      {
+        "id": "slow-artifact",
+        "name": "Slow artifact",
+        "minutes": {
+          "release-build": 4
+        },
+        "arrivals": {}
+      }
+    ]
+  },
+  "tapeSha256": "fd7f2622dc1817cc1ea98a90548989a499c84f9d59df7fc3d41317231d0b08f9",
+  "limits": {
+    "budget": 8,
+    "wait": 2
+  },
+  "baseline": [
+    {
+      "caseId": "reference",
+      "rows": [
+        {
+          "id": "check-api",
+          "slot": 0,
+          "start": 0,
+          "end": 9
+        },
+        {
+          "id": "check-web",
+          "slot": 1,
+          "start": 0,
+          "end": 9
+        },
+        {
+          "id": "check-sdk",
+          "slot": 0,
+          "start": 9,
+          "end": 13
+        },
+        {
+          "id": "release-build",
+          "slot": 1,
+          "start": 9,
+          "end": 12
+        },
+        {
+          "id": "check-docs",
+          "slot": 1,
+          "start": 12,
+          "end": 14
+        },
+        {
+          "id": "release-tests",
+          "slot": 0,
+          "start": 13,
+          "end": 15
+        },
+        {
+          "id": "publish",
+          "slot": 0,
+          "start": 15,
+          "end": 16
+        }
+      ],
+      "stats": {
+        "missed": 1,
+        "lateness": 6,
+        "backgroundWait": 8,
+        "extraMinutes": 0,
+        "finish": 16
+      }
+    },
+    {
+      "caseId": "slow-checks",
+      "rows": [
+        {
+          "id": "check-api",
+          "slot": 0,
+          "start": 0,
+          "end": 12
+        },
+        {
+          "id": "check-web",
+          "slot": 1,
+          "start": 0,
+          "end": 13
+        },
+        {
+          "id": "check-sdk",
+          "slot": 0,
+          "start": 12,
+          "end": 16
+        },
+        {
+          "id": "release-build",
+          "slot": 1,
+          "start": 13,
+          "end": 16
+        },
+        {
+          "id": "check-docs",
+          "slot": 0,
+          "start": 16,
+          "end": 18
+        },
+        {
+          "id": "release-tests",
+          "slot": 1,
+          "start": 16,
+          "end": 18
+        },
+        {
+          "id": "publish",
+          "slot": 0,
+          "start": 18,
+          "end": 19
+        }
+      ],
+      "stats": {
+        "missed": 1,
+        "lateness": 9,
+        "backgroundWait": 11,
+        "extraMinutes": 0,
+        "finish": 19
+      }
+    },
+    {
+      "caseId": "slow-artifact",
+      "rows": [
+        {
+          "id": "check-api",
+          "slot": 0,
+          "start": 0,
+          "end": 9
+        },
+        {
+          "id": "check-web",
+          "slot": 1,
+          "start": 0,
+          "end": 9
+        },
+        {
+          "id": "check-sdk",
+          "slot": 0,
+          "start": 9,
+          "end": 13
+        },
+        {
+          "id": "release-build",
+          "slot": 1,
+          "start": 9,
+          "end": 13
+        },
+        {
+          "id": "check-docs",
+          "slot": 0,
+          "start": 13,
+          "end": 15
+        },
+        {
+          "id": "release-tests",
+          "slot": 1,
+          "start": 13,
+          "end": 15
+        },
+        {
+          "id": "publish",
+          "slot": 0,
+          "start": 15,
+          "end": 16
+        }
+      ],
+      "stats": {
+        "missed": 1,
+        "lateness": 6,
+        "backgroundWait": 8,
+        "extraMinutes": 0,
+        "finish": 16
+      }
+    }
+  ],
+  "proposal": {
+    "plan": {
+      "policy": "deadline",
+      "burst": {
+        "from": 2,
+        "minutes": 6
+      }
+    },
+    "runs": [
+      {
+        "caseId": "reference",
+        "rows": [
+          {
+            "id": "check-api",
+            "slot": 0,
+            "start": 0,
+            "end": 9
+          },
+          {
+            "id": "check-web",
+            "slot": 1,
+            "start": 0,
+            "end": 9
+          },
+          {
+            "id": "release-build",
+            "slot": 2,
+            "start": 2,
+            "end": 5
+          },
+          {
+            "id": "release-tests",
+            "slot": 2,
+            "start": 5,
+            "end": 7
+          },
+          {
+            "id": "publish",
+            "slot": 2,
+            "start": 7,
+            "end": 8
+          },
+          {
+            "id": "check-sdk",
+            "slot": 0,
+            "start": 9,
+            "end": 13
+          },
+          {
+            "id": "check-docs",
+            "slot": 1,
+            "start": 9,
+            "end": 11
+          }
+        ],
+        "stats": {
+          "missed": 0,
+          "lateness": 0,
+          "backgroundWait": 8,
+          "extraMinutes": 6,
+          "finish": 13
+        }
+      },
+      {
+        "caseId": "slow-checks",
+        "rows": [
+          {
+            "id": "check-api",
+            "slot": 0,
+            "start": 0,
+            "end": 12
+          },
+          {
+            "id": "check-web",
+            "slot": 1,
+            "start": 0,
+            "end": 13
+          },
+          {
+            "id": "release-build",
+            "slot": 2,
+            "start": 2,
+            "end": 5
+          },
+          {
+            "id": "release-tests",
+            "slot": 2,
+            "start": 5,
+            "end": 7
+          },
+          {
+            "id": "publish",
+            "slot": 2,
+            "start": 7,
+            "end": 8
+          },
+          {
+            "id": "check-sdk",
+            "slot": 0,
+            "start": 12,
+            "end": 16
+          },
+          {
+            "id": "check-docs",
+            "slot": 1,
+            "start": 13,
+            "end": 15
+          }
+        ],
+        "stats": {
+          "missed": 0,
+          "lateness": 0,
+          "backgroundWait": 11,
+          "extraMinutes": 6,
+          "finish": 16
+        }
+      },
+      {
+        "caseId": "slow-artifact",
+        "rows": [
+          {
+            "id": "check-api",
+            "slot": 0,
+            "start": 0,
+            "end": 9
+          },
+          {
+            "id": "check-web",
+            "slot": 1,
+            "start": 0,
+            "end": 9
+          },
+          {
+            "id": "release-build",
+            "slot": 2,
+            "start": 2,
+            "end": 6
+          },
+          {
+            "id": "release-tests",
+            "slot": 2,
+            "start": 6,
+            "end": 8
+          },
+          {
+            "id": "publish",
+            "slot": 0,
+            "start": 9,
+            "end": 10
+          },
+          {
+            "id": "check-sdk",
+            "slot": 1,
+            "start": 9,
+            "end": 13
+          },
+          {
+            "id": "check-docs",
+            "slot": 0,
+            "start": 10,
+            "end": 12
+          }
+        ],
+        "stats": {
+          "missed": 0,
+          "lateness": 0,
+          "backgroundWait": 8,
+          "extraMinutes": 6,
+          "finish": 13
+        }
+      }
+    ],
+    "summary": {
+      "missed": 0,
+      "lateness": 0,
+      "extraMinutes": 6,
+      "backgroundWait": 11
+    }
+  }
+}

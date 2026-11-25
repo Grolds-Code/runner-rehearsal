@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Replay a CI queue, test runner policies, and verify the outcome from the schedule.">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; worker-src 'self'; img-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>Runner Rehearsal</title>
+  <link rel="icon" href="./favicon.png" type="image/png">
+  <link rel="stylesheet" href="./app/styles.css">
+  <script type="module" src="./app/main.mjs"></script>
+</head>
+<body>
+  <a class="skip" href="#replay">Skip to replay</a>
+  <header class="top">
+    <div class="top-inner">
+      <a class="brand" href="#top" id="top"><span class="mark" aria-hidden="true"><i></i><i></i><i></i></span>Runner Rehearsal</a>
+      <nav aria-label="Workspace">
+        <a class="nav-link" href="#replay">Replay</a>
+        <a class="nav-link" href="#evidence">Evidence</a>
+        <button id="load-tape" class="button button-secondary" type="button">
+          <span class="upload-icon" aria-hidden="true"></span> Load tape
+        </button>
+        <input id="tape-file" type="file" accept=".json,application/json" hidden>
+      </nav>
+    </div>
+  </header>
+  <main>
+    <section class="hero" aria-labelledby="headline">
+      <div class="hero-copy">
+        <p class="eyebrow"><span class="signal" aria-hidden="true"></span> CI RUNNER SIMULATOR</p>
+        <h1 id="headline">Make the release window<span>.</span></h1>
+        <p class="hero-description">Replay a blocked CI queue. Find a runner policy that meets the release deadline within your capacity budget.</p>
+      </div>
+      <div class="hero-result" aria-labelledby="outcome-heading">
+        <div class="result-top">
+          <h2 id="outcome-heading">Worst-case release delay</h2>
+          <span class="result-case" id="case-count">Loading</span>
+        </div>
+        <div class="result-numbers">
+          <div><strong id="hero-before">—</strong><span>Current FIFO</span></div>
+          <span class="result-arrow" aria-hidden="true">→</span>
+          <div><strong id="hero-after">—</strong><span>Recommended</span></div>
+        </div>
+        <p id="hero-status" class="hero-status" aria-live="polite">Preparing the reference and stress cases.</p>
+      </div>
+    </section>
+
+    <noscript><p class="notice">Enable JavaScript to run the simulation in your browser.</p></noscript>
+
+    <section class="workspace" id="replay" aria-label="Queue replay">
+      <div class="workspace-top">
+        <div class="workload">
+          <label class="eyebrow" for="workload">WORKLOAD</label>
+          <select id="workload">
+            <option value="release">The blocked release</option>
+            <option value="pr">A crowded pull request</option>
+          </select>
+        </div>
+        <div class="workload-meta">
+          <span id="tape-origin" class="subtle">Synthetic incident</span>
+          <span id="tape-overview" class="small subdued"></span>
+        </div>
+      </div>
+      <p id="app-error" class="notice" role="alert" hidden></p>
+      <div class="grid">
+        <div class="primary">
+          <section class="panel timeline-panel" aria-labelledby="timeline-heading">
+            <div class="panel-heading">
+              <div>
+                <h2 id="timeline-heading">Runner timeline</h2>
+                <p>Compare dispatch plans on the same workload.</p>
+              </div>
+              <span class="unit-label">MINUTES</span>
+            </div>
+            <div id="cases" class="case-tabs" role="group" aria-label="Load case"></div>
+            <div class="timeline-scroll" id="timeline-scroll" tabindex="0" role="region" aria-label="Baseline and alternate schedules">
+              <div id="timelines" class="timelines"><p>Loading the queue…</p></div>
+            </div>
+            <div class="timeline-footer">
+              <div class="legend">
+                <span><i class="swatch swatch-check"></i> Background job</span>
+                <span><i class="swatch swatch-critical"></i> Release path</span>
+                <span><i class="swatch swatch-deadline"></i> First deadline</span>
+              </div>
+              <div class="segmented" role="group" aria-label="Alternate plan">
+                <button id="show-plan" type="button" aria-pressed="true">Recommendation</button>
+                <button id="show-priority" type="button" aria-pressed="false">Priority only</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel trace-panel" aria-labelledby="trace-heading">
+            <div class="panel-heading">
+              <div>
+                <h2 id="trace-heading">Job dependencies</h2>
+                <p id="trace-description">Select a job on the timeline to inspect it.</p>
+              </div>
+            </div>
+            <div id="graph-scroll" class="graph-scroll" role="region" aria-label="Upstream dependency graph" tabindex="0">
+              <div id="job-graph" class="job-graph"></div>
+            </div>
+            <div id="job-detail" class="job-detail"></div>
+          </section>
+        </div>
+
+        <aside class="secondary" aria-label="Replay controls and result">
+          <section class="panel control-panel" aria-labelledby="controls-heading">
+            <div class="panel-heading">
+              <div>
+                <h2 id="controls-heading">Search limits</h2>
+                <p>Set how much extra capacity and wait the plan may add.</p>
+              </div>
+            </div>
+            <form id="controls">
+              <label class="control" for="budget">
+                <span>Extra capacity<small>Additional runner-minutes</small></span>
+                <input type="number" id="budget" min="0" max="15" step="1" value="8" required inputmode="numeric">
+              </label>
+              <label class="control" for="wait">
+                <span>Background wait<small>Extra minutes vs. current maximum</small></span>
+                <input type="number" id="wait" min="0" max="30" step="1" value="2" required inputmode="numeric">
+              </label>
+              <button id="replay-button" class="button button-primary" type="submit"><span aria-hidden="true">↻</span> Replay queue</button>
+            </form>
+          </section>
+
+          <section class="panel recommendation" aria-labelledby="plan-heading">
+            <div class="panel-heading">
+              <div>
+                <h2 id="plan-heading">Recommended change</h2>
+                <p id="plan-scope">Searching the schedule space.</p>
+              </div>
+            </div>
+            <div class="proposal" id="proposal"></div>
+            <div class="plan-stats" id="plan-stats"></div>
+            <p id="search-status" class="search-status small" role="status">Replaying the queue…</p>
+          </section>
+        </aside>
+      </div>
+    </section>
+
+    <section id="evidence" class="evidence-grid" aria-label="Evidence">
+      <section class="panel cases-panel" aria-labelledby="case-heading">
+        <div class="panel-heading">
+          <div>
+            <h2 id="case-heading">Stress cases</h2>
+            <p>Release delay and additional capacity by workload.</p>
+          </div>
+        </div>
+        <div class="table-scroll" role="region" tabindex="0" aria-label="Stress case comparison">
+          <table>
+            <thead><tr><th scope="col">Load case</th><th scope="col">FIFO delay</th><th scope="col" id="alternate-column">Plan delay</th><th scope="col">Runner-min</th></tr></thead>
+            <tbody id="case-table"></tbody>
+          </table>
+        </div>
+      </section>
+      <section class="panel proof-panel" aria-labelledby="proof-heading">
+        <div class="panel-heading">
+          <div>
+            <h2 id="proof-heading">Replay proof</h2>
+            <p>Check the schedule, dispatch order, deadlines, and limits independently of the planner.</p>
+          </div>
+        </div>
+        <div class="proof-actions">
+          <button class="button button-secondary" type="button" id="export-proof" disabled>Export proof</button>
+          <button class="button button-quiet" type="button" id="import-proof">Verify a proof</button>
+          <input id="proof-file" type="file" accept=".json,application/json" hidden>
+        </div>
+        <p id="proof-status" class="proof-status small" role="status">Export includes the workload and the recommended schedule.</p>
+        <details>
+          <summary>Model assumptions</summary>
+          <p>Jobs run to completion on identical runners. The model uses fixed arrivals, explicit dependencies, and whole-minute runtimes. An extra runner stays billable until its last job finishes.</p>
+          <p>Stress cases vary declared inputs. Results apply to these replays. Files are processed in this browser.</p>
+          <button id="export-tape" type="button" class="text-button">Download current tape</button>
+        </details>
+      </section>
+    </section>
+
+    <footer><span>Runner Rehearsal</span><span>Simulated CI workloads · Local verification</span></footer>
+  </main>
+</body>
+</html>
